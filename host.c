@@ -511,7 +511,7 @@ void Host_ShutdownServer(qboolean crash) {
   // clear structures
   //
   //	memset (&sv, 0, sizeof(sv)); // ServerSpawn already do this by
-  //Host_ClearMemory
+  // Host_ClearMemory
   memset(svs.clients, 0, svs.maxclientslimit * sizeof(client_t));
 }
 
@@ -728,8 +728,6 @@ void _Host_Frame(float time) {
   } else
     S_Update(vec3_origin, vec3_origin, vec3_origin, vec3_origin);
 
-  CDAudio_Update();
-
   if (host_speeds.value) {
     pass1 = (time1 - time3) * 1000;
     time3 = Sys_DoubleTime();
@@ -835,7 +833,6 @@ void Host_Init(void) {
     SCR_Init();
     R_Init();
     S_Init();
-    CDAudio_Init();
     BGM_Init();
     Sbar_Init();
     CL_Init();
@@ -894,7 +891,6 @@ void Host_Shutdown(void) {
     if (con_initialized)
       History_Shutdown();
     BGM_Shutdown();
-    CDAudio_Shutdown();
     S_Shutdown();
     IN_Shutdown();
     VID_Shutdown();

@@ -34,7 +34,6 @@ MUSIC_OBJS = bgmusic.o snd_codec.o snd_flac.o snd_wave.o snd_vorbis.o \
 
 COMOBJ_SND = snd_dma.o snd_mix.o snd_mem.o $(MUSIC_OBJS)
 SYSOBJ_SND = snd_sdl.o
-SYSOBJ_CDA = cd_sdl.o
 SYSOBJ_INPUT = in_sdl.o
 SYSOBJ_GL_VID = gl_vidsdl.o
 SYSOBJ_NET = net_bsd.o net_udp.o
@@ -47,7 +46,7 @@ GLOBJS = gl_refrag.o gl_rlight.o gl_rmain.o gl_fog.o gl_rmisc.o r_part.o \
          r_brush.o gl_model.o
 
 OBJS = strlcat.o strlcpy.o $(GLOBJS) $(SYSOBJ_INPUT) $(COMOBJ_SND) \
-       $(SYSOBJ_SND) $(SYSOBJ_CDA) $(SYSOBJ_NET) net_dgrm.o net_loop.o \
+       $(SYSOBJ_SND) $(SYSOBJ_NET) net_dgrm.o net_loop.o \
        net_main.o chase.o cl_demo.o cl_input.o cl_main.o cl_parse.o \
        cl_tent.o console.o keys.o menu.o sbar.o view.o wad.o cmd.o \
        common.o miniz.o crc.o cvar.o cfgfile.o host.o host_cmd.o \
@@ -69,7 +68,7 @@ $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OBJ_DIR)/%.o: %.m | $(OBJ_DIR)
-	clang -c $< -o $@ $(CFLAGS) -x objective-c
+	clang -c $< -o $@ $(CFLAGS)
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)

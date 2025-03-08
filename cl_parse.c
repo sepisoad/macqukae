@@ -66,8 +66,8 @@ const char* svc_strings[] = {
     "svc_bf",       // 40						// no data
     "svc_fog",      // 41					// [byte] density [byte] red [byte] green [byte]
                     // blue [float] time
-    "svc_spawnbaseline2",  // 42			// support for large modelindex, large
-                           // framenum, alpha, using flags
+    "svc_spawnbaseline2",     // 42			// support for large modelindex, large
+                              // framenum, alpha, using flags
     "svc_spawnstatic2",       // 43			// support for large modelindex, large
                               // framenum, alpha, using flags
     "svc_spawnstaticsound2",  //	44		// [coord3] [short] samp [byte] vol
@@ -1149,10 +1149,8 @@ void CL_ParseServerMessage(void) {
       case svc_setpause:
         cl.paused = MSG_ReadByte();
         if (cl.paused) {
-          CDAudio_Pause();
           BGM_Pause();
         } else {
-          CDAudio_Resume();
           BGM_Resume();
         }
         break;
