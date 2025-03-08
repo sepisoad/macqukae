@@ -1,6 +1,6 @@
 # MacQuake
 
-- this is a cleaned-up version of quakespasm that just easy to compile on MacOS
+- this is a cleaned-up version of quakespasm that is easy to compile on MacOS (and it only works on MacOS)
 - it's mainly for my debugging purpose
 - it removes all the non necessary files from quakespasm to make navigation easy
 
