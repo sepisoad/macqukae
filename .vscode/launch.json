@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "dbg",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/macquake",
+      "args": [
+        "-basedir",
+        "/Users/sepi/Games/Quake1",
+        "+map",
+        "end"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    }
+  ]
+}

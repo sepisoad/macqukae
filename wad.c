@@ -23,11 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-int				wad_numlumps;
-lumpinfo_t		*wad_lumps;
-byte			*wad_base = NULL;
+int wad_numlumps;
+lumpinfo_t* wad_lumps;
+byte* wad_base = NULL;
 
-void SwapPic (qpic_t *pic);
+void SwapPic(qpic_t* pic);
 
 /*
 ==================
@@ -40,24 +40,22 @@ Space padding is so names can be printed nicely in tables.
 Can safely be performed in place.
 ==================
 */
-void W_CleanupName (const char *in, char *out)
-{
-	int		i;
-	int		c;
+void W_CleanupName(const char* in, char* out) {
+  int i;
+  int c;
 
-	for (i=0 ; i<16 ; i++ )
-	{
-		c = in[i];
-		if (!c)
-			break;
+  for (i = 0; i < 16; i++) {
+    c = in[i];
+    if (!c)
+      break;
 
-		if (c >= 'A' && c <= 'Z')
-			c += ('a' - 'A');
-		out[i] = c;
-	}
+    if (c >= 'A' && c <= 'Z')
+      c += ('a' - 'A');
+    out[i] = c;
+  }
 
-	for ( ; i< 16 ; i++ )
-		out[i] = 0;
+  for (; i < 16; i++)
+    out[i] = 0;
 }
 
 /*
@@ -65,91 +63,91 @@ void W_CleanupName (const char *in, char *out)
 W_LoadWadFile
 ====================
 */
-void W_LoadWadFile (void) //johnfitz -- filename is now hard-coded for honesty
+void W_LoadWadFile(void)  // johnfitz -- filename is now hard-coded for honesty
 {
-	lumpinfo_t		*lump_p;
-	wadinfo_t		*header;
-	int			i;
-	int			infotableofs;
-	const char		*filename = WADFILENAME;
+  lumpinfo_t* lump_p;
+  wadinfo_t* header;
+  int i;
+  int infotableofs;
+  const char* filename = WADFILENAME;
 
-	//johnfitz -- modified to use malloc
-	//TODO: use cache_alloc
-	if (wad_base)
-		free (wad_base);
-	wad_base = COM_LoadMallocFile (filename, NULL);
-	if (!wad_base)
-		Sys_Error ("W_LoadWadFile: couldn't load %s\n\n"
-			   "Basedir is: %s\n\n"
-			   "Check that this has an " GAMENAME " subdirectory containing pak0.pak and pak1.pak, "
-			   "or use the -basedir command-line option to specify another directory.",
-			   filename, com_basedir);
+  // johnfitz -- modified to use malloc
+  // TODO: use cache_alloc
+  if (wad_base)
+    free(wad_base);
+  wad_base = COM_LoadMallocFile(filename, NULL);
+  if (!wad_base)
+    Sys_Error(
+        "W_LoadWadFile: couldn't load %s\n\n"
+        "Basedir is: %s\n\n"
+        "Check that this has an " GAMENAME
+        " subdirectory containing pak0.pak and pak1.pak, "
+        "or use the -basedir command-line option to specify another directory.",
+        filename, com_basedir);
 
-	header = (wadinfo_t *)wad_base;
+  header = (wadinfo_t*)wad_base;
 
-	if (header->identification[0] != 'W' || header->identification[1] != 'A'
-	 || header->identification[2] != 'D' || header->identification[3] != '2')
-		Sys_Error ("Wad file %s doesn't have WAD2 id\n",filename);
+  if (header->identification[0] != 'W' || header->identification[1] != 'A' ||
+      header->identification[2] != 'D' || header->identification[3] != '2')
+    Sys_Error("Wad file %s doesn't have WAD2 id\n", filename);
 
-	wad_numlumps = LittleLong(header->numlumps);
-	infotableofs = LittleLong(header->infotableofs);
-	wad_lumps = (lumpinfo_t *)(wad_base + infotableofs);
+  wad_numlumps = LittleLong(header->numlumps);
+  infotableofs = LittleLong(header->infotableofs);
+  wad_lumps = (lumpinfo_t*)(wad_base + infotableofs);
 
-	for (i=0, lump_p = wad_lumps ; i<wad_numlumps ; i++,lump_p++)
-	{
-		lump_p->filepos = LittleLong(lump_p->filepos);
-		lump_p->size = LittleLong(lump_p->size);
-		W_CleanupName (lump_p->name, lump_p->name);	// CAUTION: in-place editing!!!
-		if (lump_p->type == TYP_QPIC)
-			SwapPic ( (qpic_t *)(wad_base + lump_p->filepos));
-	}
+  for (i = 0, lump_p = wad_lumps; i < wad_numlumps; i++, lump_p++) {
+    lump_p->filepos = LittleLong(lump_p->filepos);
+    lump_p->size = LittleLong(lump_p->size);
+    W_CleanupName(lump_p->name, lump_p->name);  // CAUTION: in-place editing!!!
+    if (lump_p->type == TYP_QPIC)
+      SwapPic((qpic_t*)(wad_base + lump_p->filepos));
+  }
 }
-
 
 /*
 =============
 W_GetLumpinfo
 =============
 */
-static lumpinfo_t *W_GetLumpinfo (lumpinfo_t *lumps, int numlumps, const char *name)
-{
-	int		i;
-	lumpinfo_t	*lump_p;
-	char	clean[16];
+static lumpinfo_t* W_GetLumpinfo(lumpinfo_t* lumps,
+                                 int numlumps,
+                                 const char* name) {
+  int i;
+  lumpinfo_t* lump_p;
+  char clean[16];
 
-	W_CleanupName (name, clean);
+  W_CleanupName(name, clean);
 
-	for (lump_p=lumps, i=0 ; i<numlumps ; i++,lump_p++)
-	{
-		if (!strcmp(clean, lump_p->name))
-			return lump_p;
-	}
+  for (lump_p = lumps, i = 0; i < numlumps; i++, lump_p++) {
+    if (!strcmp(clean, lump_p->name))
+      return lump_p;
+  }
 
-	Con_SafePrintf ("W_GetLumpinfo: %s not found\n", name); //johnfitz -- was Sys_Error
-	return NULL;
+  Con_SafePrintf("W_GetLumpinfo: %s not found\n",
+                 name);  // johnfitz -- was Sys_Error
+  return NULL;
 }
 
-void *W_GetLumpName (const char *name)
-{
-	lumpinfo_t	*lump;
+void* W_GetLumpName(const char* name) {
+  lumpinfo_t* lump;
 
-	lump = W_GetLumpinfo (wad_lumps, wad_numlumps, name);
+  lump = W_GetLumpinfo(wad_lumps, wad_numlumps, name);
 
-	if (!lump) return NULL; //johnfitz
+  if (!lump)
+    return NULL;  // johnfitz
 
-	return (void *)(wad_base + lump->filepos);
+  return (void*)(wad_base + lump->filepos);
 }
 
-void *W_GetLumpNum (int num)
-{
-	lumpinfo_t	*lump;
+void* W_GetLumpNum(int num) {
+  lumpinfo_t* lump;
 
-	if (num < 0 || num > wad_numlumps)
-		Sys_Error ("W_GetLumpNum: bad number: %i", num);
+  if (num < 0 || num > wad_numlumps)
+    Sys_Error("W_GetLumpNum: bad number: %i", num);
 
-	lump = wad_lumps + num;
+  lump = wad_lumps + num;
 
-	return (void *)(wad_base + lump->filepos);
+  return (void*)(wad_base + lump->filepos);
 }
 
 /*
@@ -157,21 +155,20 @@ void *W_GetLumpNum (int num)
 W_OpenWadFile
 =================
 */
-static qboolean W_OpenWadFile (const char *filename, fshandle_t *fh)
-{
-	FILE *f;
-	long  length;
+static qboolean W_OpenWadFile(const char* filename, fshandle_t* fh) {
+  FILE* f;
+  long length;
 
-	length = (long)COM_FOpenFile (filename, &f, NULL);
-	if (length == -1)
-		return false;
+  length = (long)COM_FOpenFile(filename, &f, NULL);
+  if (length == -1)
+    return false;
 
-	fh->file = f;
-	fh->start = ftell (f);
-	fh->pos = 0;
-	fh->length = length;
-	fh->pak = file_from_pak;
-	return true;
+  fh->file = f;
+  fh->start = ftell(f);
+  fh->pos = 0;
+  fh->length = length;
+  fh->pak = file_from_pak;
+  return true;
 }
 
 /*
@@ -179,83 +176,82 @@ static qboolean W_OpenWadFile (const char *filename, fshandle_t *fh)
 W_AddWadFile
 =================
 */
-static wad_t *W_AddWadFile (const char *name, fshandle_t *fh)
-{
-	int			i, id, numlumps, infotableofs, disksize;
-	wadinfo_t	header;
-	lumpinfo_t *lumps, *info;
-	wad_t	   *wad;
+static wad_t* W_AddWadFile(const char* name, fshandle_t* fh) {
+  int i, id, numlumps, infotableofs, disksize;
+  wadinfo_t header;
+  lumpinfo_t *lumps, *info;
+  wad_t* wad;
 
-	FS_fread ((void *)&header, 1, sizeof (header), fh);
+  FS_fread((void*)&header, 1, sizeof(header), fh);
 
-	id = LittleLong (header.identification[0] | (header.identification[1] << 8)
-			| (header.identification[2] << 16) | (header.identification[3] << 24));
-	if (id != WADID && id != WADID_VALVE)
-	{
-		Con_Warning ("%s is not a valid WAD\n", name);
-		return NULL;
-	}
+  id = LittleLong(header.identification[0] | (header.identification[1] << 8) |
+                  (header.identification[2] << 16) |
+                  (header.identification[3] << 24));
+  if (id != WADID && id != WADID_VALVE) {
+    Con_Warning("%s is not a valid WAD\n", name);
+    return NULL;
+  }
 
-	numlumps = LittleLong (header.numlumps);
-	infotableofs = LittleLong (header.infotableofs);
+  numlumps = LittleLong(header.numlumps);
+  infotableofs = LittleLong(header.infotableofs);
 
-	if (numlumps < 0 || infotableofs < 0)
-	{
-		Con_Warning ("%s is not a valid WAD (%i lumps, %i info table offset)\n", name, numlumps, infotableofs);
-		return NULL;
-	}
-	if (!numlumps)
-	{
-		Con_DPrintf2 ("WAD file %s has no lumps, ignored\n", name);
-		return NULL;
-	}
+  if (numlumps < 0 || infotableofs < 0) {
+    Con_Warning("%s is not a valid WAD (%i lumps, %i info table offset)\n",
+                name, numlumps, infotableofs);
+    return NULL;
+  }
+  if (!numlumps) {
+    Con_DPrintf2("WAD file %s has no lumps, ignored\n", name);
+    return NULL;
+  }
 
-	lumps = (lumpinfo_t *)malloc (numlumps * sizeof (lumpinfo_t));
+  lumps = (lumpinfo_t*)malloc(numlumps * sizeof(lumpinfo_t));
 
-	FS_fseek (fh, infotableofs, SEEK_SET);
-	FS_fread (lumps, 1, numlumps * sizeof (lumpinfo_t), fh);
+  FS_fseek(fh, infotableofs, SEEK_SET);
+  FS_fread(lumps, 1, numlumps * sizeof(lumpinfo_t), fh);
 
-	// parse the directory
-	for (i = 0, info = lumps; i < numlumps; i++, info++)
-	{
-		W_CleanupName (info->name, info->name);
-		info->filepos = LittleLong (info->filepos);
-		info->size = LittleLong (info->size);
-		disksize = LittleLong (info->disksize);
+  // parse the directory
+  for (i = 0, info = lumps; i < numlumps; i++, info++) {
+    W_CleanupName(info->name, info->name);
+    info->filepos = LittleLong(info->filepos);
+    info->size = LittleLong(info->size);
+    disksize = LittleLong(info->disksize);
 
-		if (info->filepos + info->size > fh->length && !(info->filepos + disksize > fh->length))
-			info->size = disksize;
+    if (info->filepos + info->size > fh->length &&
+        !(info->filepos + disksize > fh->length))
+      info->size = disksize;
 
-		// ensure lump sanity
-		if (info->filepos < 0 || info->size < 0 || info->filepos + info->size > fh->length)
-		{
-			if (info->filepos > fh->length || info->size < 0)
-			{
-				Con_Warning ("WAD file %s lump \"%.16s\" begins %li bytes beyond end of WAD\n", name, info->name, info->filepos - fh->length);
+    // ensure lump sanity
+    if (info->filepos < 0 || info->size < 0 ||
+        info->filepos + info->size > fh->length) {
+      if (info->filepos > fh->length || info->size < 0) {
+        Con_Warning(
+            "WAD file %s lump \"%.16s\" begins %li bytes beyond end of WAD\n",
+            name, info->name, info->filepos - fh->length);
 
-				info->filepos = 0;
-				info->size = q_max (0, info->size - info->filepos);
-			}
-			else
-			{
-				Con_Warning (
-					"WAD file %s lump \"%.16s\" extends %li bytes beyond end of WAD (lump size is %i)\n", name, info->name,
-					(info->filepos + info->size) - fh->length, info->size);
+        info->filepos = 0;
+        info->size = q_max(0, info->size - info->filepos);
+      } else {
+        Con_Warning(
+            "WAD file %s lump \"%.16s\" extends %li bytes beyond end of WAD "
+            "(lump size is %i)\n",
+            name, info->name, (info->filepos + info->size) - fh->length,
+            info->size);
 
-				info->size = q_max (0, info->size - info->filepos);
-			}
-		}
-	}
+        info->size = q_max(0, info->size - info->filepos);
+      }
+    }
+  }
 
-	wad = (wad_t *)malloc (sizeof (wad_t));
-	q_strlcpy (wad->name, name, sizeof (wad->name));
-	wad->id = id;
-	wad->fh = *fh;
-	wad->numlumps = numlumps;
-	wad->lumps = lumps;
+  wad = (wad_t*)malloc(sizeof(wad_t));
+  q_strlcpy(wad->name, name, sizeof(wad->name));
+  wad->id = id;
+  wad->fh = *fh;
+  wad->numlumps = numlumps;
+  wad->lumps = lumps;
 
-	Con_DPrintf ("%s\n", name);
-	return wad;
+  Con_DPrintf("%s\n", name);
+  return wad;
 }
 
 /*
@@ -263,52 +259,46 @@ static wad_t *W_AddWadFile (const char *name, fshandle_t *fh)
 W_LoadWadList
 =================
 */
-wad_t *W_LoadWadList (const char *names)
-{
-	char	  *newnames = q_strdup (names);
-	char	  *name, *e;
-	wad_t	  *wad, *wads = NULL;
-	char	   filename[MAX_QPATH];
-	fshandle_t fh;
+wad_t* W_LoadWadList(const char* names) {
+  char* newnames = q_strdup(names);
+  char *name, *e;
+  wad_t *wad, *wads = NULL;
+  char filename[MAX_QPATH];
+  fshandle_t fh;
 
-	for (name = newnames; name && *name;)
-	{
-		e = strchr (name, ';');
-		if (e)
-			*e++ = 0;
+  for (name = newnames; name && *name;) {
+    e = strchr(name, ';');
+    if (e)
+      *e++ = 0;
 
-		// remove all of the leading garbage left by the map editor
-		COM_FileBase (name, filename, sizeof (filename));
-		COM_AddExtension (filename, ".wad", sizeof (filename));
+    // remove all of the leading garbage left by the map editor
+    COM_FileBase(name, filename, sizeof(filename));
+    COM_AddExtension(filename, ".wad", sizeof(filename));
 
-		if (!W_OpenWadFile (filename, &fh))
-		{
-			// try the "gfx" directory
-			memmove (filename + 4, filename, sizeof (filename) - 4);
-			memcpy (filename, "gfx/", 4);
-			filename[sizeof (filename) - 1] = 0;
+    if (!W_OpenWadFile(filename, &fh)) {
+      // try the "gfx" directory
+      memmove(filename + 4, filename, sizeof(filename) - 4);
+      memcpy(filename, "gfx/", 4);
+      filename[sizeof(filename) - 1] = 0;
 
-			if (!W_OpenWadFile (filename, &fh))
-			{
-				name = e;
-				continue;
-			}
-		}
+      if (!W_OpenWadFile(filename, &fh)) {
+        name = e;
+        continue;
+      }
+    }
 
-		wad = W_AddWadFile (filename, &fh);
-		if (wad)
-		{
-			wad->next = wads;
-			wads = wad;
-		}
-		else
-			FS_fclose (&fh);
+    wad = W_AddWadFile(filename, &fh);
+    if (wad) {
+      wad->next = wads;
+      wads = wad;
+    } else
+      FS_fclose(&fh);
 
-		name = e;
-	}
-	free (newnames);
+    name = e;
+  }
+  free(newnames);
 
-	return wads;
+  return wads;
 }
 
 /*
@@ -316,19 +306,17 @@ wad_t *W_LoadWadList (const char *names)
 W_FreeWadList
 =================
 */
-void W_FreeWadList (wad_t *wads)
-{
-	wad_t *next;
+void W_FreeWadList(wad_t* wads) {
+  wad_t* next;
 
-	while (wads)
-	{
-		FS_fclose (&wads->fh);
-		free (wads->lumps);
+  while (wads) {
+    FS_fclose(&wads->fh);
+    free(wads->lumps);
 
-		next = wads->next;
-		free (wads);
-		wads = next;
-	}
+    next = wads->next;
+    free(wads);
+    wads = next;
+  }
 }
 
 /*
@@ -336,23 +324,20 @@ void W_FreeWadList (wad_t *wads)
 W_GetLumpinfoList
 =================
 */
-lumpinfo_t *W_GetLumpinfoList (wad_t *wads, const char *name, wad_t **out_wad)
-{
-	lumpinfo_t *info;
+lumpinfo_t* W_GetLumpinfoList(wad_t* wads, const char* name, wad_t** out_wad) {
+  lumpinfo_t* info;
 
-	while (wads)
-	{
-		info = W_GetLumpinfo (wads->lumps, wads->numlumps, name);
-		if (info)
-		{
-			*out_wad = wads;
-			return info;
-		}
+  while (wads) {
+    info = W_GetLumpinfo(wads->lumps, wads->numlumps, name);
+    if (info) {
+      *out_wad = wads;
+      return info;
+    }
 
-		wads = wads->next;
-	}
+    wads = wads->next;
+  }
 
-	return NULL;
+  return NULL;
 }
 
 /*
@@ -363,8 +348,7 @@ automatic byte swapping
 =============================================================================
 */
 
-void SwapPic (qpic_t *pic)
-{
-	pic->width = LittleLong(pic->width);
-	pic->height = LittleLong(pic->height);
+void SwapPic(qpic_t* pic) {
+  pic->width = LittleLong(pic->width);
+  pic->height = LittleLong(pic->height);
 }
