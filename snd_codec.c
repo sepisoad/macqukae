@@ -28,15 +28,7 @@
 #include "snd_codeci.h"
 
 /* headers for individual codecs */
-#include "snd_mikmod.h"
-#include "snd_modplug.h"
-#include "snd_xmp.h"
-#include "snd_umx.h"
 #include "snd_wave.h"
-#include "snd_flac.h"
-#include "snd_mp3.h"
-#include "snd_vorbis.h"
-#include "snd_opus.h"
 
 static snd_codec_t* codecs;
 

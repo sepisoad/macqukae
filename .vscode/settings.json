@@ -1,6 +1,8 @@
 {
   "files.associations": {
     "sdl.h": "c",
-    "quakedef.h": "c"
+    "quakedef.h": "c",
+    "snd_mp3.h": "c",
+    "snd_wave.h": "c"
   }
 }

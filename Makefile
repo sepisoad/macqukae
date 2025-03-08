@@ -28,9 +28,7 @@ BIN_DIR := $(BUILD_DIR)/bin
 SRCS := $(wildcard *.c) $(wildcard *.m)
 
 # Object files
-MUSIC_OBJS = bgmusic.o snd_codec.o snd_flac.o snd_wave.o snd_vorbis.o \
-             snd_opus.o snd_mp3tag.o snd_mikmod.o snd_modplug.o \
-             snd_xmp.o snd_umx.o
+MUSIC_OBJS = bgmusic.o snd_codec.o snd_wave.o
 
 COMOBJ_SND = snd_dma.o snd_mix.o snd_mem.o $(MUSIC_OBJS)
 SYSOBJ_SND = snd_sdl.o
